@@ -74,10 +74,10 @@ Disenchanting on an alt? `/cs enchanting off` turns on Shuffle mode without Ench
 /cs options                settings (also Options > AddOns > CraftShuffle)
 ```
 
-## Notes for the WoW Forever beta
+## Notes for WoW Forever
 
-- Forever is in beta and its API can change between builds. If something breaks after a patch, report it with
-  the output of `/cs status`.
+- Forever's API can change with patches. If something breaks after a patch, report it with the output of
+  `/cs status`.
 - Disenchant yields start as estimates from the classic tables. Forever may differ; your own disenchants
   correct them over time. Disenchant one of an item before buying it in bulk.
 
