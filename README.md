@@ -10,7 +10,7 @@ materials, and a tracker that learns real disenchant results from your own casts
 ## Install
 
 1. Install **CraftProfit** first.
-2. Download the release zip and extract it into `World of Warcraft\_classic_beta_\Interface\AddOns\`, so you end
+2. Download the release zip and extract it into `World of Warcraft\_forever_\Interface\AddOns\`, so you end
    up with `...\Interface\AddOns\CraftShuffle\CraftShuffle.toc`.
 3. Type `/reload` (or start the game) and make sure both addons are enabled in the AddOns list.
 
