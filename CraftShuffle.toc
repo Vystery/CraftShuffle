@@ -1,0 +1,25 @@
+## Interface: 16001
+## Title: CraftShuffle
+## Notes: Which recipes to craft and disenchant for profit. Shuffle mode in the profession window, a bulk shuffle planner, a disenchant scan of the Auction House, and a disenchant tracker that replaces the built-in yield estimates with your real results.
+## Author: Vystery
+## Version: 0.2.4
+## SavedVariables: CraftShuffleDB
+## SavedVariablesPerCharacter: CraftShuffleCharDB
+## Dependencies: CraftProfit
+## OptionalDeps: Auctionator, TradeSkillMaster
+## IconTexture: Interface\Icons\INV_Enchant_ShardBrilliantLarge
+## X-Category: Professions
+## X-License: MIT
+## X-Website: https://discord.gg/hbJXz7qqpJ
+
+Core.lua
+DEData.lua
+DETracker.lua
+DEBench.lua
+Calculator.lua
+ProfessionUI.lua
+Planner.lua
+DEScan.lua
+Recipes.lua
+DESession.lua
+Options.lua

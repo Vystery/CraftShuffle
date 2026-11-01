@@ -1,0 +1,3 @@
+# Dev notes and tests stay local; the repo holds what ships to CurseForge
+docs/
+tests/
