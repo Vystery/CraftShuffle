@@ -9,7 +9,7 @@
 ## OptionalDeps: Auctionator, TradeSkillMaster
 ## IconTexture: Interface\Icons\INV_Enchant_ShardBrilliantLarge
 ## X-Category: Professions
-## X-License: MIT
+## X-License: All Rights Reserved
 ## X-Website: https://discord.gg/hbJXz7qqpJ
 
 Core.lua
