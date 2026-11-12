@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The Shuffle panel in the recipe details no longer overlaps other addons (ForeverRecipes' Difficulty and
+  Source rows, Auctionator's reagent total). It uses CraftProfit's new placement, so it needs CraftProfit
+  0.5.1; with an older CraftProfit it keeps the old placement.
 - Recipe browser: "Sells for" now shows a grey "x2" (or x3, ...) on recipes that make more than one item per
   craft, such as Shadow Oil and Goblin Rocket Fuel. The price and profit are for the whole craft, which read as
   an inflated per-unit price next to the AH's.

@@ -209,6 +209,14 @@ local function PanelRightInset(form)
 end
 
 local function AnchorPanel(p, form)
+	-- CraftProfit 0.5.1+ measures the form and places the panel below the reagents and below other
+	-- addons' rows (ForeverRecipes, Auctionator). Older CraftProfit: the fixed layout below.
+	local CPUI = CS.CP and CS.CP.UI
+	if CPUI and CPUI.PlaceBelowContent and CPUI.PlaceBelowContent(p, form, PANEL_HEIGHT) then
+		p.csStretch = false
+		p.csAnchor = nil
+		return
+	end
 	local slots = BasicSlots(form)
 	local anchor
 	if #slots > 0 then
@@ -316,7 +324,10 @@ local function CreatePanel(form)
 	p:SetFrameLevel(form:GetFrameLevel() + 5)
 	if type(form.HookScript) == "function" then
 		form:HookScript("OnSizeChanged", function(f)
-			if f.csPanel and f.csPanel:IsShown() then AnchorPanel(f.csPanel, f) end
+			if f.csPanel and f.csPanel:IsShown() then
+				f.csPanel.cpGeometry = nil -- CraftProfit's placement cache: measure again
+				AnchorPanel(f.csPanel, f)
+			end
 		end)
 	end
 	p:SetScript("OnSizeChanged", function(self) LayoutPanel(self) end)
@@ -410,8 +421,11 @@ function UI:UpdatePanel(form, recipeInfo)
 	end
 	local eco = CS.Calc:Get(recipeInfo.recipeID)
 	p.csEco = eco
+	p.cpGeometry = nil -- new recipe: measure again
 	AnchorPanel(p, form)
 	p:Show()
+	local CPUI = CS.CP and CS.CP.UI
+	if CPUI and CPUI.SettlePanel then CPUI.SettlePanel(p, form, AnchorPanel) end
 	local session = CS.Planner and CS.Planner.session
 	p.PlanButton:SetText((session and eco.recipeID == session.recipeID) and "Session" or "Plan...")
 
