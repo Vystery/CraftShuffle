@@ -672,7 +672,8 @@ local function QualityName(quality, text)
 end
 
 -- Money in a cell, coloured through Blizzard font objects: green profit, red loss, white otherwise.
-local function SetMoney(fs, value, signed)
+-- prefix: optional text shown before the amount (e.g. the "x2" output marker).
+local function SetMoney(fs, value, signed, prefix)
 	if value == nil then
 		TrySetFont(fs, "GameFontDisableSmall")
 		fs:SetText(DASH)
@@ -683,8 +684,16 @@ local function SetMoney(fs, value, signed)
 	else
 		TrySetFont(fs, "GameFontHighlightSmall")
 	end
-	fs:SetText(CS:MoneyShort(value, signed and { sign = true } or nil))
+	fs:SetText((prefix or "") .. CS:MoneyShort(value, signed and { sign = true } or nil))
 end
+
+-- "x2 " in grey when a craft makes more than one item: the sale and profit are for the whole craft, so the
+-- marker keeps the cell from reading as a per-unit price next to the AH's. nil for a single item.
+local function OutputMarker(quantity)
+	if type(quantity) ~= "number" or quantity == 1 or quantity <= 0 then return nil end
+	return string.format("|cff808080x%g|r ", quantity)
+end
+Rec.OutputMarker = OutputMarker
 
 local function SetPlain(fs, text, font)
 	TrySetFont(fs, font or "GameFontHighlightSmall")
@@ -1338,7 +1347,7 @@ function Rec:RenderRecipeRow(row, r)
 	SetPlain(cells.prof, self:ProfName(r.prof), "GameFontDisableSmall")
 	SetPlain(cells.ilvl, r.ilvl and tostring(r.ilvl) or "", "GameFontDisableSmall")
 	SetMoney(cells.cost, r.cost)
-	SetMoney(cells.sale, r.sale)
+	SetMoney(cells.sale, r.sale, false, OutputMarker(r.base and r.base.quantity))
 	SetMoney(cells.profit, r.profit, true)
 	SetMoney(cells.shuffle, r.shuffle, true)
 	local st = STATUS_TEXT[r.status] or STATUS_TEXT.other

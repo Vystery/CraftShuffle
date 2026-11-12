@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Recipe browser: "Sells for" now shows a grey "x2" (or x3, ...) on recipes that make more than one item per
+  craft, such as Shadow Oil and Goblin Rocket Fuel. The price and profit are for the whole craft, which read as
+  an inflated per-unit price next to the AH's.
+
 ## 0.2.4
 
 - Fixed: green weapons of item level 21-30 (Dire Wand and others) showed Greater Astral Essence or Lesser Astral
