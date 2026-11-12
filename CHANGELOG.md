@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.5
 
 - The Shuffle panel in the recipe details no longer overlaps other addons (ForeverRecipes' Difficulty and
   Source rows, Auctionator's reagent total). It uses CraftProfit's new placement, so it needs CraftProfit
