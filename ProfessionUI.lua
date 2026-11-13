@@ -208,14 +208,27 @@ local function PanelRightInset(form)
 	return PANEL_INSET
 end
 
+local LayoutPanel -- below
+
 local function AnchorPanel(p, form)
 	-- CraftProfit 0.5.1+ measures the form and places the panel below the reagents and below other
-	-- addons' rows (ForeverRecipes, Auctionator). Older CraftProfit: the fixed layout below.
+	-- addons' rows (ForeverRecipes, Auctionator). 0.5.3+ also never lets it reach Track Recipe or the
+	-- Create button: a one-line "strip" when space is short, or "dock"ed in its own window below or right
+	-- of the profession window (CraftProfit's "panelDock" setting). Older CraftProfit: the fixed layout below.
 	local CPUI = CS.CP and CS.CP.UI
-	if CPUI and CPUI.PlaceBelowContent and CPUI.PlaceBelowContent(p, form, PANEL_HEIGHT) then
+	local wasMode = p.cpMode
+	if CPUI and CPUI.PlaceBelowContent and CPUI.PlaceBelowContent(p, form, PANEL_HEIGHT,
+		{ modes = true, dockFrame = CPUI.DockFrame, side = CS.CP.settings.panelDock }) then
 		p.csStretch = false
 		p.csAnchor = nil
+		if p.cpMode ~= wasMode then LayoutPanel(p) end -- strip <-> full at the same height: no OnSizeChanged
 		return
+	end
+	p.cpMode = "full"
+	if p.cpDock and p.cpDock:IsShown() then -- not measurable: back into the pane
+		p.cpDock:Hide()
+		p:SetParent(form)
+		p:SetFrameLevel(form:GetFrameLevel() + 5)
 	end
 	local slots = BasicSlots(form)
 	local anchor
@@ -250,12 +263,42 @@ local function CapPanelHeight(p)
 	return true
 end
 
+local HEADER_H = 24
+
+local function SetStrip(p, strip)
+	p.PlanButton:ClearAllPoints()
+	if strip then
+		p.PlanButton:SetPoint("RIGHT", p, "RIGHT", 0, 0)
+	else
+		p.PlanButton:SetPoint("BOTTOMRIGHT", p, "BOTTOMRIGHT", 0, 0)
+	end
+	p.Title:SetShown(not strip)
+	p.Age:SetShown(not strip)
+end
+
+-- Laid out like CraftProfit's section and the default UI's own ("Reagents:"): a gold section label, plain
+-- rows on the pane's (or the docked window's) background, no box.
 -- Decide which rows fit. Rows are built in UpdatePanel as { label, value, kind }; the panel keeps
 -- cost / mat value / cut first and adds disenchant lines as room allows.
-local function LayoutPanel(p)
+-- A "strip" (see CraftProfit's PlaceBelowContent) is one line: net, Plan button.
+LayoutPanel = function(p)
 	if CapPanelHeight(p) then return end
+	if p.cpMode == "strip" then
+		SetStrip(p, true)
+		for _, pair in ipairs(p.Rows) do pair.label:Hide() pair.value:Hide() end
+		p.Divider:Hide()
+		p.Foot:Hide()
+		p.PlanButton:Show()
+		p.NetLabel:ClearAllPoints()
+		p.NetLabel:SetPoint("LEFT", p, "LEFT", 0, 0)
+		p.Net:ClearAllPoints()
+		p.Net:SetPoint("RIGHT", p.PlanButton, "LEFT", -8, 0)
+		p.csRowsShown = 0
+		return
+	end
+	SetStrip(p, false)
 	local h = p:GetHeight() or PANEL_HEIGHT
-	local fixed = 30 + 8 + 18 + 6          -- title, divider gap, net row, bottom pad
+	local fixed = HEADER_H + 8 + 18 + 2    -- section label, divider gap, net row, bottom
 	local avail = h - fixed
 	-- The footer (yield source + Plan button) needs 20px; keep two stat rows ahead of it.
 	local showFooter = avail >= 2 * ROW_H + 20
@@ -286,11 +329,11 @@ local function LayoutPanel(p)
 
 	for i, pair in ipairs(p.Rows) do
 		local r = shown[i]
-		local y = -30 - (i - 1) * ROW_H
+		local y = -HEADER_H - (i - 1) * ROW_H
 		pair.label:ClearAllPoints()
-		pair.label:SetPoint("TOPLEFT", r and r.kind == "yield" and 20 or 10, y)
+		pair.label:SetPoint("TOPLEFT", r and r.kind == "yield" and 10 or 0, y)
 		pair.value:ClearAllPoints()
-		pair.value:SetPoint("TOPRIGHT", -10, y)
+		pair.value:SetPoint("TOPRIGHT", 0, y)
 		if r then
 			pair.label:SetText(r.label)
 			pair.value:SetText(r.value)
@@ -302,15 +345,15 @@ local function LayoutPanel(p)
 		end
 	end
 
-	local y = -30 - #shown * ROW_H + 3
+	local y = -HEADER_H - #shown * ROW_H + 3
 	p.Divider:ClearAllPoints()
-	p.Divider:SetPoint("TOPLEFT", 10, y)
-	p.Divider:SetPoint("TOPRIGHT", -10, y)
+	p.Divider:SetPoint("TOPLEFT", 0, y)
+	p.Divider:SetPoint("TOPRIGHT", 0, y)
 	p.Divider:SetShown(#shown > 0)
 	p.NetLabel:ClearAllPoints()
-	p.NetLabel:SetPoint("TOPLEFT", 10, y - 7)
+	p.NetLabel:SetPoint("TOPLEFT", 0, y - 7)
 	p.Net:ClearAllPoints()
-	p.Net:SetPoint("TOPRIGHT", -10, y - 5)
+	p.Net:SetPoint("TOPRIGHT", 0, y - 5)
 
 	p.Foot:SetShown(showFooter)
 	p.PlanButton:SetShown(showFooter)
@@ -318,8 +361,8 @@ local function LayoutPanel(p)
 end
 
 local function CreatePanel(form)
-	local template = BackdropTemplateMixin and "BackdropTemplate" or nil
-	local p = CreateFrame("Frame", "CraftShufflePanel", form, template)
+	local p = CreateFrame("Frame", "CraftShufflePanel", form)
+	p.cpDockTitle = "CraftShuffle" -- the window it moves into when the recipe has no room (CraftProfit)
 	p:SetSize(PANEL_MAX_WIDTH, PANEL_HEIGHT)
 	p:SetFrameLevel(form:GetFrameLevel() + 5)
 	if type(form.HookScript) == "function" then
@@ -332,24 +375,14 @@ local function CreatePanel(form)
 	end
 	p:SetScript("OnSizeChanged", function(self) LayoutPanel(self) end)
 
-	if p.SetBackdrop then
-		p:SetBackdrop({
-			bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-			tile = true, tileSize = 16, edgeSize = 12,
-			insets = { left = 3, right = 3, top = 3, bottom = 3 },
-		})
-		p:SetBackdropColor(0.07, 0.05, 0.03, 0.92)
-		p:SetBackdropBorderColor(0.42, 0.35, 0.24, 1)
-	end
-
-	p.Title = p:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	p.Title:SetPoint("TOPLEFT", 10, -9)
-	p.Title:SetText("Shuffle " .. DASH .. " Disenchant Value")
+	-- no box: the pane's (or the docked window's) own background, like the default sections above it
+	p.Title = p:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+	p.Title:SetPoint("TOPLEFT", 0, -3)
+	p.Title:SetText("Shuffle (Disenchant Value):")
 
 	p.Age = p:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
 	p.Age:SetPoint("LEFT", p.Title, "RIGHT", 8, -1)
-	p.Age:SetPoint("RIGHT", p, "RIGHT", -10, 0)
+	p.Age:SetPoint("RIGHT", p, "RIGHT", 0, 0)
 	p.Age:SetJustifyH("RIGHT")
 	if p.Age.SetWordWrap then p.Age:SetWordWrap(false) end
 	if p.Age.SetMaxLines then p.Age:SetMaxLines(1) end
@@ -374,13 +407,13 @@ local function CreatePanel(form)
 	p.Net:SetJustifyH("RIGHT")
 
 	p.Foot = p:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-	p.Foot:SetPoint("BOTTOMLEFT", 10, 6)
+	p.Foot:SetPoint("BOTTOMLEFT", 0, 3)
 	p.Foot:SetJustifyH("LEFT")
 	if p.Foot.SetWordWrap then p.Foot:SetWordWrap(false) end
 
 	p.PlanButton = CreateFrame("Button", nil, p, "UIPanelButtonTemplate")
 	p.PlanButton:SetSize(64, 18)
-	p.PlanButton:SetPoint("BOTTOMRIGHT", -6, 4)
+	p.PlanButton:SetPoint("BOTTOMRIGHT", 0, 0)
 	p.PlanButton:SetText("Plan...")
 	p.PlanButton:SetScript("OnClick", function()
 		local eco = p.csEco

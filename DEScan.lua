@@ -958,7 +958,7 @@ function Scan:Slash(rest)
 	elseif sub == "list" or sub == "top" then
 		self:PrintTop(tonumber(arg) or 10)
 	else
-		CS:Print("usage: /cs scan [de|vendor]  |  /cs scan [de|vendor] min <money>  |  /cs scan [de|vendor] list [n]")
+		CS:Print("usage: /cs scan [de | vendor]  |  /cs scan [de | vendor] min <money>  |  /cs scan [de | vendor] list [n]")
 	end
 	if switched then self:Refresh() end
 end

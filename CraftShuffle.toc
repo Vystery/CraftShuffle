@@ -2,7 +2,7 @@
 ## Title: CraftShuffle
 ## Notes: Which recipes to craft and disenchant for profit. Shuffle mode in the profession window, a bulk shuffle planner, a disenchant scan of the Auction House, and a disenchant tracker that replaces the built-in yield estimates with your real results.
 ## Author: Vystery
-## Version: 0.2.5
+## Version: 0.2.6
 ## SavedVariables: CraftShuffleDB
 ## SavedVariablesPerCharacter: CraftShuffleCharDB
 ## Dependencies: CraftProfit

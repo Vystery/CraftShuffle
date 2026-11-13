@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.6
+
+- The Shuffle panel follows CraftProfit 0.5.3's new layout: it never covers Track Recipe or the
+  Create/Enchant button. When space is short it becomes one line (net and Plan); with no room at all it moves
+  into its own CraftShuffle window below or right of the profession window (CraftProfit's "Profit panel when
+  there is no room" option, `/cf dock below | right`). It now looks like the recipe pane's own sections: a gold
+  "Shuffle (Disenchant Value):" label and plain rows, no box. Needs CraftProfit 0.5.3; with an older
+  CraftProfit it keeps the 0.2.5 placement.
+- Fixed: usage lines such as `/cs mode sell|shuffle` lost characters in chat (a "|" starts a chat color code).
+  They now read `/cs mode sell | shuffle`.
+
 ## 0.2.5
 
 - The Shuffle panel in the recipe details no longer overlaps other addons (ForeverRecipes' Difficulty and
